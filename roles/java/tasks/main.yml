@@ -1,0 +1,119 @@
+---
+- name: Install Oracle JDK
+  yum: name={{ item }} state=present update_cache=yes
+  with_items:
+    - oracle-j2sdk1.7
+    - unzip
+  tags:
+    - java
+
+- name: Get JAVA Home
+  command: "find /usr/java/ -name '*cloudera'"
+  register: java_home
+  ignore_errors: True
+  tags:
+    - java  
+
+- stat: path="{{ tmp_dir }}/UnlimitedJCEPolicyJDK7.zip"
+  register: jce_zip_exists
+  tags:
+    - java
+
+- stat:
+    path: "{{ java_home.stdout }}/jre/lib/security/ansible"
+  register: jce_lock
+  tags:
+    - java
+
+- name: Download JCE unlimited policy
+  get_url:
+    url=http://download.oracle.com/otn-pub/java/jce/7/UnlimitedJCEPolicyJDK7.zip
+    dest="{{ tmp_dir }}/UnlimitedJCEPolicyJDK7.zip"
+    headers="Cookie:oraclelicense=accept-securebackup-cookie"
+  when: 
+    - jce_zip_exists.stat.exists == False
+    - jce_lock.stat.exists == False
+  tags:
+    - java
+
+- name: Unzip JCE unlimited policy files
+  unarchive:
+    src: "{{ tmp_dir }}/UnlimitedJCEPolicyJDK7.zip"
+    dest: "{{ tmp_dir }}"
+    copy: no
+  when:
+    - jce_lock.stat.exists == False
+  tags:
+    - java
+
+- name: Install local_policy.jar
+  copy:
+    src: "{{tmp_dir}}/UnlimitedJCEPolicy/local_policy.jar"
+    dest: "{{java_home.stdout}}/jre/lib/security/local_policy.jar"
+    backup: yes
+    remote_src: True
+  when:
+    - jce_lock.stat.exists == False
+  tags:
+    - java
+
+- name: Install US_export_policy.jar
+  copy:
+    src: "{{ tmp_dir }}/UnlimitedJCEPolicy/US_export_policy.jar"
+    dest: "{{ java_home.stdout }}/jre/lib/security/US_export_policy.jar"
+    backup: yes
+    remote_src: True
+  when:
+    - jce_lock.stat.exists == False
+  tags:
+    - java
+
+- name: Cleanup tmp files
+  file:
+    path="{{ tmp_dir }}/{{ item }}"
+    state=absent
+  with_items:
+    - UnlimitedJCEPolicy
+    - UnlimitedJCEPolicyJDK7.zip
+  ignore_errors: True
+  when: jce_lock.stat.exists == False
+  tags:
+    - java
+
+- name: Add ansible marker that JCE is installed
+  file:
+    path: "{{ java_home.stdout }}/jre/lib/security/ansible"
+    state: touch
+  when: jce_lock.stat.exists == False
+  tags:
+    - java
+
+- name: Is Java  installed ?
+  fail:
+    msg: "java not installed"
+  when: "not java_home.stdout"
+  tags:
+    - java
+
+- name: check java alternative install
+  command: "java -version"
+  ignore_errors: True
+  register: is_java_installed
+  tags:
+    - java
+
+- name: Make Java available for system
+  command: 'alternatives --install "/usr/bin/java" "java" "{{java_home.stdout}}/bin/java" 2000'
+  when: "is_java_installed.rc > 0"
+  tags:
+    - java
+
+- name: correct java version selected
+  alternatives:
+    name: java
+    path: "{{java_home.stdout}}/bin/java"
+  when: "is_java_installed.rc > 0"
+  tags:
+    - java
+
+

@@ -1,0 +1,44 @@
+---
+cdh_version: 5.7.1
+scm_version: 5.7.1
+scm_products:
+  - product: CDH
+    version: 5.7.1-1.cdh5.7.1.p0.11
+cdh_cluster_display_name: Ansible Cluster
+cdh_cluster_name: ansible1
+scm_port: 7180
+scm_ssl_port: 7183
+scm_default_user: admin
+scm_default_pass: admin
+scm_repositories:
+  - http://archive.cloudera.com/cdh5/parcels/5.7.1/
+  - http://archive.cloudera.com/cdh5/parcels/5.7.1.11/
+  - http://archive.cloudera.com/spark/parcels/latest/
+  - https://archive.cloudera.com/sqoop-connectors/parcels/latest/
+  - https://archive.cloudera.com/navigator-keytrustee5/parcels/5.7.1/
+
+cdh_services:
+  - type: hdfs
+    dfs_data_dir_list: /dfs/dn
+    fs_checkpoint_dir_list: /dfs/snn
+    dfs_name_dir_list: /dfs/nn
+    dfs_journalnode_edits_dir: /dfs/jn
+
+  - type: hive
+  
+  - type: impala
+    scratch_dirs: /tmp/impala
+
+  - type: hue
+
+  - type: oozie
+
+  - type: sentry
+
+  - type: spark
+
+  - type: yarn
+    yarn_nodemanager_local_dirs: /tmp/nm
+    yarn_nodemanager_log_dirs: /var/log/nm
+
+  - type: zookeeper

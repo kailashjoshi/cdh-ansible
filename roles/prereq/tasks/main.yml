@@ -1,0 +1,24 @@
+---
+- name: Include SElinux Configuration
+  include: selinux.yml
+
+- name: Include VM Swappiness
+  include: vm-swappiness.yml
+
+- name: Include IP Tables
+  include: iptables.yml
+
+- name: Include Pam Limits Configuration
+  include: pam_limit.yml
+
+- name: Include Huge Page Configuration
+  include: huge-pages.yml
+
+- name: Add Cloudera Manager yum repository
+  yum_repository:
+    name: cloudera-manager
+    description: Cloudera Manager
+    baseurl: http://archive.cloudera.com/cm5/redhat/{{ ansible_distribution_major_version }}/x86_64/cm/5.7.1/
+    gpgkey: http://archive.cloudera.com/cm5/redhat/{{ ansible_distribution_major_version }}/x86_64/cm/RPM-GPG-KEY-cloudera
+    gpgcheck: yes
+    enabled: yes

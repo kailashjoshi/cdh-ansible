@@ -1,0 +1,6 @@
+---
+- name: restart kdc
+  service: name={{ item }} state=restarted enabled=yes
+  with_items:
+    - krb5kdc
+    - kadmin

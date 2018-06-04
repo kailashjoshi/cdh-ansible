@@ -1,0 +1,14 @@
+---
+# tasks file for ntp
+- name: Install ntp server
+  yum: name={{ item }} state=present update_cache=yes
+  with_items:
+    - ntp
+
+- name: Ensure ntp started
+  service: name=ntpd state=started enabled=yes
+
+- name: Copy the ntp.conf template file
+  template: src=ntp.conf.j2 dest=/etc/ntp.conf backup=yes
+  notify: 
+   - restart ntp

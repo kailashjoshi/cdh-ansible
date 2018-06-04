@@ -1,0 +1,10 @@
+---
+- name: set vm.swappiness 
+  sysctl:
+    name: vm.swappiness
+    value: "{{ swappiness }}"
+    state: present
+    ignoreerrors: yes
+  tags:
+    - osharden
+    - swappiness

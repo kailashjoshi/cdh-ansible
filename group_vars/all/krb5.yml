@@ -1,0 +1,5 @@
+---
+krb5_kdc_type: mit
+krb5_kdc_admin_user: "admin/admin@{{ hostvars[groups['krb5_server'][0]]['default_realm'] }}"
+krb5_kdc_admin_passwd: admin
+krb5_kdc_master_passwd: admin

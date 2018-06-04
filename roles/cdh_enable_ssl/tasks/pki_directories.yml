@@ -1,0 +1,52 @@
+---
+- name: Check PKI Directory of Cloudera
+  stat: path="{{cdh_encryption_key_location}}"
+  register: dir_result
+
+- name: Create PKI directory
+  file:
+    path: "{{cdh_encryption_key_location}}"
+    state: directory
+    owner: cloudera-scm
+    group: cloudera-scm
+    mode: 0755
+  when: dir_result.stat.exists == False 
+
+- name: Check x509 Directory exists
+  stat: path="{{cdh_encryption_key_location}}/x509"
+  register: x509_result
+
+- name: Create x509 directory
+  file:
+    path: "{{cdh_encryption_key_location}}/x509"
+    state: directory
+    owner: cloudera-scm
+    group: cloudera-scm
+    mode: 0755
+  when: x509_result.stat.exists == False 
+
+- name: Check jks Directory exists
+  stat: path="{{cdh_encryption_key_location}}/jks"
+  register: jks_result
+
+- name: Create jks directory
+  file:
+    path: "{{cdh_encryption_key_location}}/jks"
+    state: directory
+    owner: cloudera-scm
+    group: cloudera-scm
+    mode: 0755
+  when: jks_result.stat.exists == False
+
+- name: Check CAcerts Directory exists
+  stat: path="{{cdh_encryption_key_location}}/CAcerts"
+  register: CAcerts_result
+
+- name: Create CAcerts directory
+  file:
+    path: "{{cdh_encryption_key_location}}/CAcerts"
+    state: directory
+    owner: cloudera-scm
+    group: cloudera-scm
+    mode: 0755
+  when: CAcerts_result.stat.exists == False

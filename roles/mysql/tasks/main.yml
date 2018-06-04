@@ -1,0 +1,85 @@
+---
+- name: Install Mysql packages
+  yum: name={{ item }} state=installed
+  with_items:
+    - mysql-server
+    - MySQL-python
+  tags:
+    - mysql
+
+- name: Install Mysql Connector packages
+  yum: name=mysql-connector-java state=present
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['all_hadoop_nodes'] }}"
+  tags:
+    - mysql
+
+- name: Create Mysql configuration file
+  template: src=my.cnf.j2 dest=/etc/my.cnf
+  notify:
+    - restart mysql
+  tags:
+    - mysql
+
+- name: Create Mysql log file
+  file: path={{ mysql_log }} state=touch owner=mysql group=mysql mode=0775
+  tags:
+    - mysql
+
+- name: Create Mysql PID directory
+  file: path={{ mysql_pid_dir }} state=directory owner=mysql group=mysql mode=0775
+  tags:
+    - mysql
+
+- name: Start Mysql Service
+  service: name=mysqld state=started enabled=yes
+  tags:
+    - mysql
+
+- name: Set root password
+  mysql_user: name=root password={{ mysql_root_password }} state=present
+  ignore_errors: True
+  tags:
+    - mysql
+
+- name: Remove anonymous users
+  command: 'mysql -uroot -p{{ mysql_root_password }} -ne "{{ item }}"'
+  with_items:
+    - DELETE FROM mysql.user WHERE User=''
+  tags:
+    - mysql
+
+- name: Disable remote login for root
+  command: 'mysql -uroot -p{{ mysql_root_password }} -ne "{{ item }}"'
+  with_items:
+    - DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('127.0.0.1', '::1', 'localhost')
+  tags:
+    - mysql
+
+- name: Remove the test database
+  mysql_db: login_user=root login_password={{ mysql_root_password }} db=test state=absent
+  tags:
+    - mysql
+
+- name: Reload privilege tables
+  command: 'mysql -uroot -p{{ mysql_root_password }} -ne "{{ item }}"'
+  with_items:
+    - FLUSH PRIVILEGES
+  tags:
+    - mysql
+
+- name: Create databases
+  mysql_db: login_user=root login_password={{ mysql_root_password }}
+              name={{ item.value.name }} state=present
+  with_dict: "{{ databases }}"
+  tags:
+    - mysql
+
+- name: Create database users
+  mysql_user: login_user=root login_password={{ mysql_root_password }}
+                name={{ item.value.user }} password={{ item.value.pass }} update_password=always
+                priv={{ item.value.name }}.*:ALL host='%' state=present
+  with_dict: "{{ databases }}"
+  tags:
+    - mysql
+  

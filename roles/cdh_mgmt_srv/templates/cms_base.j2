@@ -1,0 +1,109 @@
+{
+  "name": "mgmt",
+  "displayName": "Cloudera Management Service",
+  "type": "MGMT",
+  "roles": [
+    {
+      "name": "mgmt-SERVICEMONITOR",
+      "type": "SERVICEMONITOR",
+      "hostRef": {
+        "hostId": "{{ scm_host_ids }}"
+      }
+    }, {
+      "name": "mgmt-ACTIVITYMONITOR",
+      "type": "ACTIVITYMONITOR",
+      "roleConfigGroupRef": {
+        "roleConfigGroupName": "mgmt-ACTIVITYMONITOR-BASE"
+      },
+      "hostRef": {
+        "hostId": "{{ scm_host_ids }}"
+      }
+    }, {
+      "name": "mgmt-HOSTMONITOR",
+      "type": "HOSTMONITOR",
+      "hostRef": {
+        "hostId": "{{ scm_host_ids }}"
+      }
+    }, {
+      "name": "mgmt-REPORTSMANAGER",
+      "type": "REPORTSMANAGER",
+      "roleConfigGroupRef": {
+        "roleConfigGroupName": "mgmt-REPORTSMANAGER-BASE"
+      },
+      "hostRef": {
+        "hostId": "{{ scm_host_ids }}"
+      }
+    }, {
+      "name": "mgmt-EVENTSERVER",
+      "type": "EVENTSERVER",
+      "hostRef": {
+        "hostId": "{{ scm_host_ids }}"
+      }
+    }, {
+      "name": "mgmt-ALERTPUBLISHER",
+      "type": "ALERTPUBLISHER",
+      "hostRef": {
+        "hostId": "{{ scm_host_ids }}"
+      }
+    }
+  ],
+  "roleConfigGroups": [
+    {
+      "name": "mgmt-ACTIVITYMONITOR-BASE",
+      "displayName": "Activity Monitor Default Group",
+      "roleType": "ACTIVITYMONITOR",
+      "base": true,
+      "serviceRef": {
+        "serviceName": "mgmt"
+      },
+      "config": {
+        "items": [
+          {
+            "name": "firehose_database_host",
+            "value": "{{ hostvars[groups['cm_database'][0]]['inventory_hostname'] }}"
+          }, {
+            "name": "firehose_database_name",
+            "value": "{{ databases.amon.name }}"
+          }, {
+            "name": "firehose_database_password",
+            "value": "{{ databases.amon.pass }}"
+          }, {
+            "name": "firehose_database_type",
+            "value": "{{ databases.amon.type }}"
+          }, {
+            "name": "firehose_database_user",
+            "value": "{{ databases.amon.user }}"
+          }
+        ]
+      }
+    }, {
+      "name": "mgmt-REPORTSMANAGER-BASE",
+      "displayName": "Reports Manager Default Group",
+      "roleType": "REPORTSMANAGER",
+      "base": true,
+      "serviceRef": {
+        "serviceName": "mgmt"
+      },
+      "config": {
+        "items": [
+          {
+            "name": "headlamp_database_host",
+            "value": "{{ hostvars[groups['cm_database'][0]]['inventory_hostname'] }}"
+          }, {
+            "name": "headlamp_database_name",
+            "value": "{{ databases.rman.name }}"
+          }, {
+            "name": "headlamp_database_password",
+            "value": "{{ databases.rman.pass }}"
+          }, {
+            "name": "headlamp_database_type",
+            "value": "{{ databases.rman.type }}"
+          }, {
+            "name": "headlamp_database_user",
+            "value": "{{ databases.rman.user }}"
+          }
+        ]
+      }
+    }
+  ]
+}

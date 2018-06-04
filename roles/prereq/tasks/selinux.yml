@@ -1,0 +1,31 @@
+---
+- name: selinux python libarary
+  yum: name=libselinux-python state=present update_cache=yes
+  tags:
+    - selinux
+    - osharden
+
+- name: disable selinux
+  selinux: state=disabled
+  tags:
+    - selinux
+    - osharden
+
+# - name: host
+#   debug: msg="{{ hostvars[item]['inventory_hostname'] }}" 
+#   with_items:
+#     - "{{ groups['scm_servers'] }}"
+#   tags:
+#     - tests
+# - debug:
+#     msg: "System {{ app_db }}"
+# - name: master echo
+#   command: echo "{{ hostvars[item]['inventory_hostname'] }}" 
+#   with_items:
+#     - "{{ groups['scm_servers'] }}"
+#   register: echo_data
+#   tags:
+#     - tests
+# - debug:
+#     msg: " {{ echo_data.results[0].stdout }}"
+#   tags: tests

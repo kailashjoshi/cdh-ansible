@@ -1,0 +1,48 @@
+#Minimum number of Node required is 5
+
+#Install Cludera Deamon and Agents on all theses nodes
+[scm_servers]
+node1.emc.local
+
+
+#Install Cloudera Manager Server in this node
+[scm_mgmt]
+node1.emc.local license_file=/license/file/path
+
+#Install MIT KDC on this server
+[krb5_server]
+node1.emc.local default_realm=CLOUDERA.COM
+
+#Install Mysql Server on this node
+[cm_database]
+node1.emc.local
+
+#Gateway for all hadoop services
+[gateway_servers]
+node1.emc.local       host_template=HostTemplate-Gateway role_ref_names=HDFS-HTTPFS-1
+
+#HDFS master, secondary and journal services are install in this group
+[master_servers]
+node1.emc.local        host_template=HostTemplate-Master1
+node1.emc.local        host_template=HostTemplate-Master2
+node1.emc.local        host_template=HostTemplate-Master3
+
+#All worker data node and yarn node manager are install in this group
+[worker_servers]
+node1.emc.local
+
+#All node for hadoop services
+[all_hadoop_nodes:children]
+master_servers
+worker_servers
+gateway_servers
+
+#Ansible controller group
+[controler]
+local ansible_connection=local ansible_user=kj
+
+[worker_servers:vars]
+host_template=HostTemplate-Workers
+
+[all:vars]
+ansible_user=root

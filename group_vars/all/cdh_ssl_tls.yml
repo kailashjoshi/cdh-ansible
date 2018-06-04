@@ -1,0 +1,12 @@
+---
+enable_scm_ssl: True
+cdh_encryption_key_location: /etc/pki/cloudera
+storepass: password
+keypass: password
+cn: node1.emc.local
+ou: PS
+o: EMC
+l: Hopkinton
+st: "MA"
+c: US
+alias_cmhost: cmhost

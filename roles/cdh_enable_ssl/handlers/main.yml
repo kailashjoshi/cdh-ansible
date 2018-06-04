@@ -1,0 +1,20 @@
+---
+- name: restart agents
+  service: name=cloudera-scm-agent state=restarted enabled=yes
+  tags:
+    - cdh
+
+- name: restart server
+  service: name=cloudera-scm-server state=restarted enabled=yes
+  tags:
+    - cdh
+
+- name: wait cloudera-scm-server
+  wait_for:
+    host={{hostvars[groups['scm_mgmt'][0]] ['inventory_hostname']}}
+    port={{ scm_ssl_port }}
+    delay=5
+    state=started
+    timeout=300
+  tags:
+    - cdh

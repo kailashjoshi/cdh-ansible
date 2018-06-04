@@ -1,0 +1,32 @@
+{
+  "items" : [
+    
+    {% if enable_scm_ssl == True %}
+    {
+        "name": "AGENT_TLS",
+        "value": "true"
+      },
+      {
+        "name": "KEYSTORE_PASSWORD",
+        "value": "{{ storepass }}"
+      },
+      {
+          "name": "KEYSTORE_PATH",
+          "value": "{{cdh_encryption_key_location}}/jks/cdh.jks"
+      },
+      {
+          "name": "TRUSTSTORE_PASSWORD",
+          "value": "{{ storepass }}"
+      },
+      {
+          "name": "TRUSTSTORE_PATH",
+          "value": "{{cdh_encryption_key_location}}/x509/truststore.jks"
+      },
+      {
+            "name": "WEB_TLS",
+            "value": "true"
+      }
+
+    {% endif %}
+  ]
+}

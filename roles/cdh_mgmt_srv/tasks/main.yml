@@ -1,0 +1,51 @@
+---
+- name: Wait for agent heartbeats
+  pause: seconds=30
+  
+- name: Gather Host ID of CDH MGMT Host
+  uri:
+    url: "{{cm_api_url}}/hosts"
+    method: GET
+    status_code: 200
+    force_basic_auth: yes
+    user: "admin"
+    password: "admin"
+  ignore_errors: True
+  register: resp
+
+- set_fact: scm_hostname_inventory="{{hostvars[groups['scm_mgmt'][0]] ['inventory_hostname']}}"
+
+- set_fact: scm_host_ids="{{ item.hostId }}"
+  with_items: "{{ resp.json['items'] }}"
+  when: item.hostname == (scm_hostname_inventory)
+
+- debug: var=scm_host_ids
+
+- name: Setup the Cloudera Management Services (CMS)
+  uri:
+    url: "{{ cm_api_url }}/cm/service"
+    method: PUT
+    body_format: json
+    body: "{{ lookup('template', 'cms_base.j2') }}"
+    status_code: 200,400
+    force_basic_auth: yes
+    user: "{{ scm_default_user }}"
+    password: "{{ scm_default_pass }}"
+    return_content: yes
+  register: cms_resp
+
+- debug: var=cms_resp
+
+- name: Start Cloudera Management Services (CMS)
+  uri:
+    url: "{{ cm_api_url }}/cm/service/commands/start"
+    method: POST
+    status_code: 200
+    force_basic_auth: yes
+    user: "{{ scm_default_user }}"
+    password: "{{ scm_default_pass }}"
+    return_content: yes
+  register: start_resp
+  failed_when: "'startTime' not in start_resp.content"
+
+- debug: var=start_resp
