@@ -1,0 +1,6 @@
+---
+- name: uninstall cluster
+  hosts: all_hadoop_nodes
+  become: true
+  roles:
+    - uninstall_cdh

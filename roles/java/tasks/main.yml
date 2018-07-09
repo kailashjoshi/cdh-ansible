@@ -4,26 +4,21 @@
   with_items:
     - oracle-j2sdk1.7
     - unzip
-  tags:
-    - java
+
 
 - name: Get JAVA Home
   command: "find /usr/java/ -name '*cloudera'"
   register: java_home
   ignore_errors: True
-  tags:
-    - java  
+  changed_when: False
+
 
 - stat: path="{{ tmp_dir }}/UnlimitedJCEPolicyJDK7.zip"
   register: jce_zip_exists
-  tags:
-    - java
 
 - stat:
     path: "{{ java_home.stdout }}/jre/lib/security/ansible"
   register: jce_lock
-  tags:
-    - java
 
 - name: Download JCE unlimited policy
   get_url:
@@ -33,8 +28,6 @@
   when: 
     - jce_zip_exists.stat.exists == False
     - jce_lock.stat.exists == False
-  tags:
-    - java
 
 - name: Unzip JCE unlimited policy files
   unarchive:
@@ -43,8 +36,6 @@
     copy: no
   when:
     - jce_lock.stat.exists == False
-  tags:
-    - java
 
 - name: Install local_policy.jar
   copy:
@@ -54,8 +45,7 @@
     remote_src: True
   when:
     - jce_lock.stat.exists == False
-  tags:
-    - java
+  
 
 - name: Install US_export_policy.jar
   copy:
@@ -65,8 +55,6 @@
     remote_src: True
   when:
     - jce_lock.stat.exists == False
-  tags:
-    - java
 
 - name: Cleanup tmp files
   file:
@@ -77,43 +65,29 @@
     - UnlimitedJCEPolicyJDK7.zip
   ignore_errors: True
   when: jce_lock.stat.exists == False
-  tags:
-    - java
 
 - name: Add ansible marker that JCE is installed
   file:
     path: "{{ java_home.stdout }}/jre/lib/security/ansible"
     state: touch
   when: jce_lock.stat.exists == False
-  tags:
-    - java
 
-- name: Is Java  installed ?
-  fail:
-    msg: "java not installed"
-  when: "not java_home.stdout"
-  tags:
-    - java
 
 - name: check java alternative install
   command: "java -version"
   ignore_errors: True
   register: is_java_installed
-  tags:
-    - java
+  changed_when: False
 
 - name: Make Java available for system
   command: 'alternatives --install "/usr/bin/java" "java" "{{java_home.stdout}}/bin/java" 2000'
   when: "is_java_installed.rc > 0"
-  tags:
-    - java
+  
 
 - name: correct java version selected
   alternatives:
     name: java
     path: "{{java_home.stdout}}/bin/java"
   when: "is_java_installed.rc > 0"
-  tags:
-    - java
 
 

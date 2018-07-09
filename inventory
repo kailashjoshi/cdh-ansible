@@ -11,7 +11,7 @@ node1.emc.local license_file=/license/file/path
 
 #Install MIT KDC on this server
 [krb5_server]
-node1.emc.local default_realm=CLOUDERA.COM
+node1.emc.local 
 
 #Install Mysql Server on this node
 [cm_database]
@@ -38,11 +38,14 @@ worker_servers
 gateway_servers
 
 #Ansible controller group
-[controler]
-local ansible_connection=local ansible_user=kj
+# [controler]
+# local ansible_connection=local ansible_user=kj
 
 [worker_servers:vars]
 host_template=HostTemplate-Workers
+
+[krb5_server:vars]
+default_realm=CLOUDERA.COM
 
 [all:vars]
 ansible_user=root

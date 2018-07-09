@@ -5,6 +5,3 @@
     value: "{{ swappiness }}"
     state: present
     ignoreerrors: yes
-  tags:
-    - osharden
-    - swappiness

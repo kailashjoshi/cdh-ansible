@@ -3,60 +3,42 @@
   shell:  "cat {{ defrag_path.enabled }} | grep '\\[never\\]' "
   register: huge_pages_enabled
   ignore_errors: True
-  tags:
-    - osharden
-    - huge-pages
+  changed_when: False
+
 
 - name: turn off huge pages enabled
   shell: "echo 'never' > {{ defrag_path.enabled }} "
   when: "not huge_pages_enabled.stdout"
   ignore_errors: True
-  tags:
-    - osharden
-    - huge-pages
 
 - name: check persistance of huge pages enabled
   shell: " cat {{ rc_local }} | grep 'echo.*never.*>.*enabled$' "
   register: huge_pages_enabled_persist
   ignore_errors: True
-  tags:
-    - osharden
-    - huge-pages
+  changed_when: False
 
 - name: persist off huge pages enabled
   shell: "echo 'echo never > {{ defrag_path.enabled }}' >> {{ rc_local }} "
   when: "not huge_pages_enabled_persist.stdout"
-  tags:
-    - optimize
-    - huge-pages
 
 - name: check for huge pages defrag
   shell:  "cat {{ defrag_path.defrag }} | grep '\\[never\\]' "
   register: huge_pages_defrag
   ignore_errors: True
-  tags:
-    - osharden
-    - huge-pages
+  changed_when: False
 
 - name: turn off huge pages defrag
   shell: "echo 'never' > {{ defrag_path.defrag }} "
   ignore_errors: True
   when: "not huge_pages_defrag.stdout"
-  tags:
-    - osharden
-    - huge-pages
+
 
 - name: check persistance of huge pages defrag
   shell: " cat {{ rc_local }} | grep 'echo.*never.*>.*defrag$' "
   register: huge_pages_defrag_persist
   ignore_errors: True
-  tags:
-    - osharden
-    - huge-pages
+  changed_when: False
 
 - name: persist off huge pages defrag
   shell: "echo 'echo never > {{ defrag_path.defrag }}' >> {{ rc_local }} "
   when: "not huge_pages_defrag_persist.stdout"
-  tags:
-    - optimize
-    - huge-pages

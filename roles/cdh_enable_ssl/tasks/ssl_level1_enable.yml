@@ -24,8 +24,5 @@
     - wait cloudera-scm-server
 
 - set_fact: cm_api_url="https://{{ hostvars[groups['scm_mgmt'][0]] ['inventory_hostname'] }}:{{ scm_ssl_port }}/api/{{ cm_api_version }}"
-  tags:
-    - cdh
-    - api
 
 - debug: var=cm_api_url

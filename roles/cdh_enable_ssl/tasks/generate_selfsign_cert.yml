@@ -2,6 +2,7 @@
 - name: Check if keystore exists
   stat: path="{{cdh_encryption_key_location}}/jks/cdh.jks"
   register: keystore_results
+  changed_when: False
 
 - name: Generate Self Signed Certs
   command: "keytool -genkeypair -alias {{hostvars[inventory_hostname]['ansible_fqdn'] }} -keyalg RSA -keysize 2048 -dname 'cn={{cn}}, 
@@ -13,6 +14,7 @@
   command: "find /usr/java/ -name '*cloudera'"
   register: java_home
   ignore_errors: True
+  changed_when: False
 
 - name: validate default truststore exists
   stat: path="{{cdh_encryption_key_location}}/x509/truststore.jks"
@@ -37,6 +39,7 @@
   shell: "keytool -list -v -keystore {{cdh_encryption_key_location}}/x509/truststore.jks -storepass {{ storepass }} | grep {{hostvars[inventory_hostname]['ansible_fqdn'] }}"
   ignore_errors: True
   register: keystore_export
+  changed_when: False
 
 - debug: msg="{{keystore_export.stdout}}"
   when: keystore_export.stdout == ""

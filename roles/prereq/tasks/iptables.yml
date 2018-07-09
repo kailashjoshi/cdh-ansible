@@ -4,6 +4,3 @@
     name: iptables
     enabled: no
     state: stopped
-  tags:
-    - osharden
-    - iptables

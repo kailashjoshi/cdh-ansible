@@ -7,9 +7,6 @@
 
 - name: disable selinux
   selinux: state=disabled
-  tags:
-    - selinux
-    - osharden
 
 # - name: host
 #   debug: msg="{{ hostvars[item]['inventory_hostname'] }}" 

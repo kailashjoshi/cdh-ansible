@@ -32,8 +32,8 @@
   roles:
     - cdh_server_agents
     - cdh_mgmt_srv
-    - cdh_mgmt_settings
-    - cdh_hadoop_srv
+    # - cdh_mgmt_settings
+    # - cdh_hadoop_srv
   tags: 
     - cloudera
     

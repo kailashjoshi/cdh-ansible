@@ -1,0 +1,134 @@
+---
+- stat:
+    path: /usr/share/cmf/uninstall-cloudera-manager.sh
+  register: cdh_server
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['scm_mgmt'] }}"
+
+- name: Uninstall cloudera manager
+  command: sh /usr/share/cmf/uninstall-cloudera-manager.sh
+  when: "cdh_server.results[0].stat.exists"
+  ignore_errors: True
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['scm_mgmt'] }}"
+
+- name: Stop Cloudera manager
+  service:
+    name: cloudera-scm-server
+    state: stopped
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['scm_mgmt'] }}"
+  ignore_errors: True
+
+- name: Stop Cloudera manager db
+  service:
+    name: cloudera-scm-server-db
+    state: stopped
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['scm_mgmt'] }}"
+  ignore_errors: True
+
+- name: Remove Cloudera manager
+  yum:
+    name: cloudera-scm-server
+    state: absent
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['scm_mgmt'] }}"
+  ignore_errors: True
+
+- name: Remove Cloudera manager db
+  yum:
+    name: cloudera-scm-server-db-2
+    state: absent
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['scm_mgmt'] }}"
+  ignore_errors: True
+
+- name: Stop Cloudera manager agent
+  service:
+    name: cloudera-scm-agent
+    state: stopped
+  ignore_errors: True
+
+- name: Kill SupervisorD deamon
+  shell: "kill -9 $(ps aux | grep [s]upervisord | awk '{ print $2 }')"
+  ignore_errors: True
+
+- name: Remove Cloudera manager agent
+  yum:
+    name: 'cloudera-manager-*'
+    state: absent
+  ignore_errors: True
+
+- name: Kill CDH deamons
+  command: "for u in cloudera-scm flume hadoop hdfs hbase hive httpfs hue impala llama mapred oozie solr spark sqoop sqoop2 yarn zookeeper; do kill -9 $(ps aux | grep $u |grep -v grep| awk '{ print $2 }'); done"
+  ignore_errors: True
+
+- name: Unmount CM Process
+  command: "umount -f cm_processes"
+  ignore_errors: True
+
+- name: Remove CM Data
+  shell: "rm -rf /usr/share/cmf /var/lib/cloudera* /var/cache/yum/cloudera* /var/log/cloudera* /var/run/cloudera* /opt/cloudera* /etc/cloudera*"
+  ignore_errors: True
+
+- name: Remove Lock File
+  command: "rm /tmp/.scm_prepare_node.lock"
+  ignore_errors: True
+
+- name: Remove User Data
+  command: "rm -rf /var/lib/flume-ng /var/lib/hadoop* /var/lib/hue /var/lib/navigator /var/lib/oozie /var/lib/solr /var/lib/sqoop* /var/lib/zookeeper"
+  ignore_errors: True
+
+- name: Stop mysql
+  service:
+    name: 'mysqld'
+    state: stopped
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['cm_database'] }}"
+  ignore_errors: True
+
+- name: Remove mysql
+  yum:
+    name: 'mysql*'
+    state: absent
+  ignore_errors: True
+
+- name: Remove Mysql Data
+  command: "rm -rf /var/lib/mysql"
+  ignore_errors: True
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['cm_database'] }}"
+
+- name: Remove mysql config
+  command: "rm -rf /etc/my.cn*"
+  ignore_errors: True
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['cm_database'] }}"
+
+
+
+- name: Stop krb
+  service:
+    name: 'krb5kdc'
+    state: stopped
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['krb5_server'] }}"
+  ignore_errors: True
+
+- name: Remove krb
+  yum:
+    name: 'krb5-server'
+    state: absent
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['krb5_server'] }}"
+  ignore_errors: True
+
+- name: Remove Mysql Data
+  command: "rm -rf /var/kerberos"
+  ignore_errors: True
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['krb5_server'] }}"
+
+
+

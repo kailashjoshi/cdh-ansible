@@ -1,8 +1,6 @@
 ---
 - name: Install the Cloudera Manager Server Packages
   yum: name=cloudera-manager-server state=present
-  tags:
-    - cdh
 
 
 - name: Prepare Cloudera Manager Server External Database
@@ -12,12 +10,8 @@
              mysql {{ databases.scm.name }} {{ databases.scm.user }} {{ databases.scm.pass }}
   changed_when: False
   register: output
-  tags:
-    - cdh
 
 - debug: msg={{output}}
-  tags:
-    - cdh
 
 - name: Start the Cloudera Manager Server
   service: name={{ item }} state=started enabled=yes
@@ -26,22 +20,16 @@
   with_items:
     - cloudera-scm-server
     # - cloudera-scm-agent
-  tags:
-    - cdh
 
 - name: Install cloudera Manager Deamons
   yum: name=cloudera-manager-daemons state=present update_cache=yes 
   delegate_to: "{{ item }}"
   with_items: "{{ groups['all_hadoop_nodes'] }}"
-  tags:
-    - cdh
 
 - name: Install cloudera Manager Agents
   yum: name=cloudera-manager-agent state=present update_cache=yes 
   delegate_to: "{{ item }}"
   with_items: "{{ groups['all_hadoop_nodes'] }}"
-  tags:
-    - cdh
 
 - name: Set cloudera Server 
   lineinfile: dest=/etc/cloudera-scm-agent/config.ini regexp=^server_host line=server_host={{ hostvars[groups['scm_mgmt'][0]] ['inventory_hostname'] }}
@@ -49,8 +37,7 @@
   with_items: "{{ groups['all_hadoop_nodes'] }}"
   notify:
     - restart agents
-  tags:
-    - cdh
+
 
 - name: CDH Agent start
   service: name=cloudera-scm-agent state=started enabled=yes
@@ -59,8 +46,7 @@
   tags:
     - cdh
 - meta: flush_handlers
-  tags:
-    - cdh
+  
 
 - name: Get Cloudera Manager API version
   uri:
@@ -72,24 +58,16 @@
     force_basic_auth: yes
     return_content: yes
   register: result
-  tags:
-    - cdh
-    - api
+  
 
 - set_fact: cm_api_version="{{ result.content }}"
 
 - set_fact: cm_api_url="http://{{ hostvars[groups['scm_mgmt'][0]] ['inventory_hostname'] }}:{{ scm_port }}/api/{{ result.content }}"
-  tags:
-    - cdh
-    - api
+  
 - debug: msg={{cm_api_url}}
-  tags:
-    - cdh
-    - api
+  
 
 - include: license.yml
-  tags:
-    - cdh
-    - api
+  
 
 

@@ -8,6 +8,3 @@
     limit_type: '{{ item.limit_type }}'
     value: '{{ item.value }}'
   with_items: '{{limits}}'
-  tags:
-   - osharden
-   - pamlimits

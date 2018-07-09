@@ -21,26 +21,11 @@
   # notify:
   #   - restart cloudera-scm-server
   when: file.stat.exists == True
-  tags:
-    - cdh
-    - api
+ 
 
 - debug: var=resp
-  tags:
-    - cdh
-    - api
 
-# URI module does not have the equivalent to cURL's -F/--form
-#  uri:
-#    url: {{ cm_api_url }}/cm/license
-#    method: POST
-#    body: "c-l-o-u-d-e-r-a\nContent-Disposition: form-data; name=\"license\"\n\n{{ lookup('file', '/path/to/cloudera_license.txt') }}\nc-l-o-u-d-e-r-a"
-#    HEADER_Content-Type: "multipart/form-data; boundary=c-l-o-u-d-e-r-a"
-#    HEADER_Accept: "[*/*]"
-#    status_code: 200
-#    force_basic_auth: yes
-#    user: "{{ scm_default_user }}"
-#    password: "{{ scm_default_pass }}"
+
 
 # https://cloudera.github.io/cm_api/apidocs/v12/path__cm_trial_begin.html
 - name: Begin Cloudera Manager trial license
@@ -59,4 +44,4 @@
     - cdh
     - api
 
-# - meta: flush_handlers
+- meta: flush_handlers
