@@ -32,3 +32,19 @@
   register: scm_resp
   
 - debug: var=scm_resp
+
+- name: Update Cloudera Manager Service SSL Level 1settings
+  uri:
+    url: "{{ cm_api_url }}/cm/service/config"
+    method: PUT
+    body_format: json
+    body: "{{ lookup('template', 'cdh_ssl.j2') }}"
+    status_code: 200
+    force_basic_auth: yes
+    user: "{{ scm_default_user }}"
+    password: "{{ scm_default_pass }}"
+    return_content: yes
+    validate_certs: no
+  register: scm_resp
+
+- debug: var=scm_resp

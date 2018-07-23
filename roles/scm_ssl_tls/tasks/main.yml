@@ -63,7 +63,7 @@
     owner: cloudera-scm
     group: cloudera-scm
   delegate_to: "{{ item }}"
-  with_items: "{{ groups['scm_servers'] }}"
+  with_items: "{{ groups['all_hadoop_nodes'] }}"
 
 - name: Copy agent pem
   copy:
@@ -72,7 +72,7 @@
     owner: cloudera-scm
     group: cloudera-scm
   delegate_to: "{{ item }}"
-  with_items: "{{ groups['scm_servers'] }}"
+  with_items: "{{ groups['all_hadoop_nodes'] }}"
 
 - name: Agent key password
   template:
@@ -115,7 +115,7 @@
     owner: cloudera-scm
     group: cloudera-scm
   delegate_to: "{{ item }}"
-  with_items: "{{ groups['scm_servers'] }}"
+  with_items: "{{ groups['all_hadoop_nodes'] }}"
   notify:
     - restart agents
     - restart server

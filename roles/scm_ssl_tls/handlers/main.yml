@@ -1,6 +1,8 @@
 ---
 - name: restart agents
   service: name=cloudera-scm-agent state=restarted enabled=yes
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['all_hadoop_nodes'] }}"
   tags:
     - cdh
 

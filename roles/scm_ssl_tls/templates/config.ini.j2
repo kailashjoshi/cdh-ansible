@@ -165,7 +165,7 @@ verify_cert_file=/etc/pki/cloudera/x509/scm-server.pem
 # verify_cert_dir=
 
 # PEM file containing client private key.
-client_key_file=/etc/pki/cloudera/x509/{{hostvars[inventory_hostname]['ansible_fqdn'] }}.key
+client_key_file=/etc/pki/cloudera/x509/{{item }}.key
 
 # A command to run which returns the client private key password on stdout
 # client_keypw_cmd=
@@ -175,7 +175,7 @@ client_key_file=/etc/pki/cloudera/x509/{{hostvars[inventory_hostname]['ansible_f
 client_keypw_file=/etc/pki/cloudera/agent.pwd
 
 # PEM file containing client certificate.
-client_cert_file=/etc/pki/cloudera/x509/{{hostvars[inventory_hostname]['ansible_fqdn'] }}.pem
+client_cert_file=/etc/pki/cloudera/x509/{{ item }}.pem
 
 ## Location of Hadoop files.  These are the CDH locations when installed by
 ## packages.  Unused when CDH is installed by parcels.
