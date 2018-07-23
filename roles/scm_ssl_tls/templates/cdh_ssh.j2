@@ -12,11 +12,11 @@
       },
       {
           "name": "KEYSTORE_PATH",
-          "value": "{{cdh_encryption_key_location}}/jks/cdh.jks"
+          "value": "{{cdh_encryption_key_location}}/jks/keystore.jks"
       },
       {
           "name": "TRUSTSTORE_PASSWORD",
-          "value": "{{ storepass }}"
+          "value": "{{ truststore_password }}"
       },
       {
           "name": "TRUSTSTORE_PATH",
@@ -25,6 +25,10 @@
       {
             "name": "WEB_TLS",
             "value": "true"
+      },
+      {
+          "name" : "NEED_AGENT_VALIDATION",
+          "value" : "true"
       }
 
     {% endif %}

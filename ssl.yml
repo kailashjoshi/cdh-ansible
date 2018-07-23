@@ -1,0 +1,7 @@
+---
+- name: ssl cloudera
+  hosts: scm_mgmt
+  become: true
+  roles:
+    - scm_ssl_tls
+  

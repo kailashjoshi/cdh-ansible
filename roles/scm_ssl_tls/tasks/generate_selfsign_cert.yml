@@ -1,24 +1,15 @@
 ---
-- name: Check if keystore exists
-  stat: path="{{cdh_encryption_key_location}}/jks/cdh.jks"
-  register: keystore_results
-  changed_when: False
-
-- name: Generate Self Signed Certs
-  command: "keytool -genkeypair -alias {{hostvars[inventory_hostname]['ansible_fqdn'] }} -keyalg RSA -keysize 2048 -dname 'cn={{cn}}, 
-          ou={{ou}},o={{o}}, l={{l}}, st={{st}}, c={{c}}' -keypass {{keypass}} 
-          -keystore {{cdh_encryption_key_location}}/jks/cdh.jks -storepass {{storepass}} -validity 360"
-  when: keystore_results.stat.exists == False
-
 - name: Get JAVA Home
   command: "find /usr/java/ -name '*cloudera'"
   register: java_home
   ignore_errors: True
   changed_when: False
 
-- name: validate default truststore exists
-  stat: path="{{cdh_encryption_key_location}}/x509/truststore.jks"
-  register: truststore_results
+- name: Generate Keypair for Cloudera Manager server
+  command: "{{java_home.stdout}}/bin/keytool -genkeypair -alias cmhost -keyalg RSA -keysize 2048 -dname 'cn={{cn}}, 
+          ou={{ou}},o={{o}}, l={{l}}, st={{st}}, c={{c}}' -keypass {{keypass}} 
+          -keystore {{cdh_encryption_key_location}}/jks/keystore.jks -storepass {{storepass}} -validity 360"
+
 
 
 - name: Copy Java default truststore
@@ -45,7 +36,7 @@
   when: keystore_export.stdout == ""
 
 - name: Export the certificate
-  shell: "keytool -export -alias {{hostvars[inventory_hostname]['ansible_fqdn'] }} -keystore {{cdh_encryption_key_location}}/jks/cdh.jks
+  shell: "keytool -export -alias {{hostvars[inventory_hostname]['ansible_fqdn'] }} -keystore {{cdh_encryption_key_location}}/jks/keystore.jks
          -rfc -file /tmp/selfsigned.cer -storepass {{ storepass }}"
   when: keystore_export.stdout == ""
 
@@ -53,7 +44,7 @@
   copy:
     remote_src: True
     src: /tmp/selfsigned.cer
-    dest: "{{cdh_encryption_key_location}}/x509/{{hostvars[inventory_hostname]['ansible_fqdn'] }}.pem"
+    dest: "{{cdh_encryption_key_location}}/x509/cm.pem"
     owner: cloudera-scm
     group: cloudera-scm
   when: keystore_export.stdout == ""
@@ -63,7 +54,7 @@
   ignore_errors: True
   when: keystore_export.stdout == ""
 
-- name: Certificate Clean up
-  file: path=/tmp/selfsigned.cer state=absent
-  when: keystore_export.stdout == ""
+# - name: Certificate Clean up
+#   file: path=/tmp/selfsigned.cer state=absent
+#   when: keystore_export.stdout == ""
 

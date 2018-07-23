@@ -1,0 +1,34 @@
+---
+- name: Get Cloudera Manager API version
+  uri:
+    url: https://{{ hostvars[groups['scm_mgmt'][0]] ['inventory_hostname'] }}:{{ scm_ssl_port }}/api/version
+    method: GET
+    status_code: 200
+    user: "{{ scm_default_user }}"
+    password: "{{ scm_default_pass }}"
+    force_basic_auth: yes
+    return_content: yes
+    validate_certs: no
+  register: result
+  
+
+- set_fact: cm_api_version="{{ result.content }}"
+
+- set_fact: cm_api_url="https://{{ hostvars[groups['scm_mgmt'][0]] ['inventory_hostname'] }}:{{ scm_ssl_port }}/api/{{ result.content }}"
+  
+- debug: msg={{cm_api_url}}
+
+- name: Update Cloudera Manager SSL Level 1settings
+  uri:
+    url: "{{ cm_api_url }}/cm/config"
+    method: PUT
+    body_format: json
+    body: "{{ lookup('template', 'cdh_ssh.j2') }}"
+    status_code: 200
+    force_basic_auth: yes
+    user: "{{ scm_default_user }}"
+    password: "{{ scm_default_pass }}"
+    return_content: yes
+    validate_certs: no
+  register: scm_resp
+- debug: var=scm_resp

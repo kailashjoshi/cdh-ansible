@@ -57,6 +57,7 @@
     password: "{{ scm_default_pass }}"
     force_basic_auth: yes
     return_content: yes
+    validate_certs: no
   register: result
   
 

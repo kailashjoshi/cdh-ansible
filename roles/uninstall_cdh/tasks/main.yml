@@ -73,13 +73,26 @@
   ignore_errors: True
 
 - name: Remove Lock File
-  command: "rm /tmp/.scm_prepare_node.lock"
+  file:
+    path: "/tmp/.scm_prepare_node.lock"
+    state: absent
+
+- name: Remove User Data
+  command: "rm -rf /var/lib/hadoop*  /var/lib/sqoop*"
   ignore_errors: True
 
 - name: Remove User Data
-  command: "rm -rf /var/lib/flume-ng /var/lib/hadoop* /var/lib/hue /var/lib/navigator /var/lib/oozie /var/lib/solr /var/lib/sqoop* /var/lib/zookeeper"
-  ignore_errors: True
-
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /var/lib/flume-ng
+    - /var/lib/hue
+    - /var/lib/navigator
+    - /var/lib/oozie
+    - /var/lib/solr
+    - /var/lib/zookeeper
+  
 - name: Stop mysql
   service:
     name: 'mysqld'
@@ -95,8 +108,9 @@
   ignore_errors: True
 
 - name: Remove Mysql Data
-  command: "rm -rf /var/lib/mysql"
-  ignore_errors: True
+  file:
+    path: "/var/lib/mysql"
+    state: absent
   delegate_to: "{{ item }}"
   with_items: "{{ groups['cm_database'] }}"
 
@@ -125,8 +139,9 @@
   ignore_errors: True
 
 - name: Remove Mysql Data
-  command: "rm -rf /var/kerberos"
-  ignore_errors: True
+  file:
+    path: "/var/kerberos"
+    state: absent
   delegate_to: "{{ item }}"
   with_items: "{{ groups['krb5_server'] }}"
 

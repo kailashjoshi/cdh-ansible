@@ -38,8 +38,8 @@ worker_servers
 gateway_servers
 
 #Ansible controller group
-# [controler]
-# local ansible_connection=local ansible_user=kj
+[controler]
+local ansible_connection=local ansible_user=kj
 
 [worker_servers:vars]
 host_template=HostTemplate-Workers

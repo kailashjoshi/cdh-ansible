@@ -18,8 +18,6 @@
     warn: False
   register: resp
   failed_when: "'owner' not in resp.stdout"
-  # notify:
-  #   - restart cloudera-scm-server
   when: file.stat.exists == True
  
 
@@ -36,9 +34,8 @@
     force_basic_auth: yes
     user: "{{ scm_default_user }}"
     password: "{{ scm_default_pass }}"
+    validate_certs: no
   ignore_errors: True
-  # notify:
-  #   - restart cloudera-scm-server
   when: file.stat.exists == False
   tags:
     - cdh

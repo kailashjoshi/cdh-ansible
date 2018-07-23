@@ -10,6 +10,7 @@
     user: "{{ scm_default_user }}"
     password: "{{ scm_default_pass }}"
     return_content: yes
+    validate_certs: no
   register: scm_resp
 
 - debug: var=scm_resp
@@ -23,4 +24,5 @@
     user: "{{ scm_default_user }}"
     password: "{{ scm_default_pass }}"
     return_content: yes
+    validate_certs: no
   when: krb5_kdc_type != 'none'

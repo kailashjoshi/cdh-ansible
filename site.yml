@@ -1,2 +1,47 @@
 ---
-- import_playbook: cdh.yml
+- name: Prerequisite for installing cluster
+  hosts: all_hadoop_nodes
+  become: true
+  roles:
+    - prereq
+    - epel_repo
+    - java
+    - ntp
+  tags:
+    - common
+
+- name: Installation of Mysql database for CDH
+  hosts: cm_database
+  become: true
+  roles:
+    - mysql
+  tags:
+    - database
+
+- name: Installation of MIT KDC
+  hosts: krb5_server
+  become: true
+  roles:
+    - kdc
+  tags:
+    - krb5
+
+- name: Installation of Cloudera
+  hosts: scm_mgmt
+  become: true
+  roles:
+    - cdh_server_agents
+    - cdh_mgmt_srv
+    - cdh_mgmt_settings
+    - cdh_hadoop_srv
+  tags: 
+    - cloudera
+
+- name: ssl cloudera
+  hosts: scm_mgmt
+  become: true
+  roles:
+    - scm_ssl_tls
+  tags: 
+    - ssl
+  

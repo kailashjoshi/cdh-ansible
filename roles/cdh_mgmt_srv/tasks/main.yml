@@ -11,6 +11,7 @@
     user: "admin"
     password: "admin"
   ignore_errors: True
+  validate_certs: no
   register: resp
 
 - set_fact: scm_hostname_inventory="{{hostvars[groups['scm_mgmt'][0]] ['inventory_hostname']}}"
@@ -32,6 +33,7 @@
     user: "{{ scm_default_user }}"
     password: "{{ scm_default_pass }}"
     return_content: yes
+    validate_certs: no
   register: cms_resp
 
 - debug: var=cms_resp
@@ -45,6 +47,7 @@
     user: "{{ scm_default_user }}"
     password: "{{ scm_default_pass }}"
     return_content: yes
+    validate_certs: no
   register: start_resp
   failed_when: "'startTime' not in start_resp.content"
 

@@ -1,0 +1,137 @@
+---
+- name: Check and create all PKI directories
+  include: pki_directories.yml
+  when: enable_scm_ssl == True
+
+- name: Delete Self Signed Directory directory remote
+  file:
+    path: "/tmp/selfsigned"
+    state: absent
+
+- name: Delete Self Signed Directory directory local
+  file:
+    path: "/tmp/selfsigned"
+    state: absent
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['controler'] }}"
+  become: no
+
+- name: Create Self Signed Directory directory
+  file:
+    path: "/tmp/selfsigned"
+    state: directory
+    mode: 0755
+
+- name: Copy self signed cert script to Cloudera manager server
+  template:
+    src: generate_self_signed_certs.sh
+    dest: /tmp/selfsigned/generate_self_signed_certs.sh
+    mode: 0777
+
+- name: Copy hosts list to Cloudera manager server
+  template:
+    src: hosts.txt.j2
+    dest: /tmp/selfsigned/hosts.txt
+    mode: 0777
+
+- name: Execute self signed cert script in Cloudera manager server
+  shell: "bash generate_self_signed_certs.sh"
+  args:
+    chdir: /tmp/selfsigned
+
+- name: Generate folder locally
+  file:
+    path: "/tmp/selfsigned"
+    state: directory
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['controler'] }}"
+  become: no
+
+- shell: (cd /tmp/selfsigned; find . -maxdepth 1 -type f ! -name '*.sh' ! -name '*.txt' ! -name '*.der') | cut -d'/' -f2
+  register: files_to_copy
+
+- debug: msg={{ files_to_copy }}
+
+- name: Copy self signed certs locally
+  fetch: src="/tmp/selfsigned/{{ item }}" dest=/tmp/selfsigned
+  with_items: "{{ files_to_copy.stdout_lines }}"
+
+- name: Copy agent key
+  copy:
+    src: "/tmp/selfsigned/{{ hostvars[groups['scm_mgmt'][0]] ['inventory_hostname'] }}/tmp/selfsigned/{{ item }}.key"
+    dest: "{{cdh_encryption_key_location}}/x509/"
+    owner: cloudera-scm
+    group: cloudera-scm
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['scm_servers'] }}"
+
+- name: Copy agent pem
+  copy:
+    src: "/tmp/selfsigned/{{ hostvars[groups['scm_mgmt'][0]] ['inventory_hostname'] }}/tmp/selfsigned/{{ item }}.pem"
+    dest: "{{cdh_encryption_key_location}}/x509/"
+    owner: cloudera-scm
+    group: cloudera-scm
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['scm_servers'] }}"
+
+- name: Agent key password
+  template:
+    src: "agent.pwd.j2"
+    dest: "{{cdh_encryption_key_location}}/agent.pwd"
+    owner: cloudera-scm
+    group: cloudera-scm
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['all_hadoop_nodes'] }}"
+
+- name: Cloudera agent config
+  template:
+    src: "config.ini.j2"
+    dest: "/etc/cloudera-scm-agent/config.ini"
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['all_hadoop_nodes'] }}"
+
+- name: Check if port 7183 is listening
+  wait_for:
+    port: "{{ scm_ssl_port }}"
+    delay: 5
+    timeout: 10
+    msg: "Timeout waiting for 7183 to respond"
+  register: port_check_https
+  ignore_errors: yes
+- debug: msg={{ port_check_https }}
+
+- name: Check and create all PKI directories
+  include: ssl_level123_http.yml
+  when: port_check_https.failed == true
+
+- name: Check and create all PKI directories
+  include: ssl_level123_https.yml
+  when: port_check_https.failed == false
+
+- name: Copy cmhost pem
+  copy:
+    src: "/tmp/selfsigned/{{ hostvars[groups['scm_mgmt'][0]] ['inventory_hostname'] }}/tmp/selfsigned/scm-server.pem"
+    dest: "{{cdh_encryption_key_location}}/x509/"
+    owner: cloudera-scm
+    group: cloudera-scm
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['scm_servers'] }}"
+  notify:
+    - restart agents
+    - restart server
+    - wait cloudera-scm-server
+
+- name: Delete Self Signed Directory directory remote
+  file:
+    path: "/tmp/selfsigned"
+    state: absent
+
+- name: Delete Self Signed Directory directory local
+  file:
+    path: "/tmp/selfsigned"
+    state: absent
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['controler'] }}"
+  become: no
+
+

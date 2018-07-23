@@ -8,6 +8,7 @@
     user: "{{ scm_default_user }}"
     password: "{{ scm_default_pass }}"
     return_content: yes
+    validate_certs: no
   register: clusters_resp
 
 - set_fact: cluster_exists={{ 'True' if clusters_resp.status == 200 else 'False' }}
@@ -24,6 +25,7 @@
     user: "{{ scm_default_user }}"
     password: "{{ scm_default_pass }}"
     return_content: yes
+    validate_certs: no
   register: template_resp
   when: cluster_exists == False
 
